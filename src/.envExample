@@ -1,0 +1,6 @@
+MONGO_DB_URL=mongodb+srv://ganeshreddyg99_db_user:ganeshreddyg99_db_user@cluster0.sedrpp9.mongodb.net/project-mongo?appName=Cluster0
+ ACCESS_TOKEN_SECRET=All IS WELL
+ACCESS_TOKEN_EXPIRY=15m
+
+REFRESH_TOKEN_SECRET=ALL IS NOTWELL
+REFRESH_TOKEN_EXPIRY=7D
