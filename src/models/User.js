@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs"
+import bcrypt from "bcryptjs";
 // Mongoose schema
 const userSchema = new mongoose.Schema({
   username: {
@@ -39,15 +39,19 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: "student",
     enum: ['teacher', 'admin', 'student']
+  },
+  refreshToken : {
+    type : String,
+    default : null
   }
 }, {
   timestamps: true
 });
-userSchema.pre("save" ,async function(){
-  const salt = await bcrypt.genSalt(10)
+userSchema.pre("save", async function(){
+  const salt = await bcrypt.genSalt(10);
   console.log(salt);
-  this.password = await bcrypt.hash(this.password,salt);
-})
+  this.password = await bcrypt.hash(this.password, salt);
+});
 
 const User = mongoose.model('User', userSchema);
 

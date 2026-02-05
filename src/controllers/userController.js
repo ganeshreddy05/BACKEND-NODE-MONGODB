@@ -1,10 +1,9 @@
 import User from "../models/User.js";
-import user from "../models/User.js";
 import {
   generateAccessToken,
   generateRefreshToken,
 } from "../utils/jwtToken.js";
-
+import bcrypt from "bcryptjs";
 async function createUser(req, res) {
   try {
     const newUser = new User(req.body);
@@ -23,7 +22,7 @@ async function createUser(req, res) {
 }
 async function getUser(req, res) {
   try {
-    const userDetails = await user.find();
+    const userDetails = await User.find();
     console.log(userDetails);
     res.status(200).json({
       message: "data fetched succesfully",
@@ -46,8 +45,14 @@ async function loginUser(req, res) {
       throw new Error("user with this username is not existed");
     }
     //check if password matches
-    const x = await existedUser.comparePassword(password);
-    console.log(x);
+    if (!existedUser.password) {
+      throw new Error("Password not set for this user");
+    }
+    const isPasswordSame = await bcrypt.compare(password, existedUser.password);
+    console.log("isPasswordSame: ", isPasswordSame);
+    if (!isPasswordSame) {
+      throw new Error("Wrong password!");
+    }
 
     //create access token and refresh function
     const accessToken = generateAccessToken(existedUser._id);
@@ -57,18 +62,19 @@ async function loginUser(req, res) {
     existedUser.refreshToken = refreshToken;
 
     //set the browser cookies-access token , refresh token
-     res.cookie("refreshToken",refreshToken,{
-        httpOnly : true,
-        secure : true,//only for production
-        sameSite : 'strict',
-        maxAge : 7*24*60*60*1000
-     }) 
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true, //only for production
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
     //send the responsse- accesstoken,refresh token
     res.status(200).json({
-        success : true,
-        message : "user loggedin succesfully",
-
-    })
+      success: true,
+      accessToken: accessToken,
+      message: "user loggedin succesfully",
+      userId : existedUser._id
+    });
   } catch (error) {
     console.error(error);
     res.status(400).json({
@@ -77,4 +83,25 @@ async function loginUser(req, res) {
     });
   }
 }
-export { createUser, getUser, loginUser };
+async function logout(req, res) {
+  try {
+    //get the userId from the req.object
+    const userId = req.user.userId;
+    //Remove refresh token from the DB
+
+    //WE HAVE TO GET THEeUSERiD-Find user document in mongoDb-nullify the refreshToken
+    await User.findByIdAndUpdate(userId, { refreshToken: null });
+    //clear the cookes also
+    res.clearCookie('refreshToken');
+    res.status(200).json({
+      message : "loggedout succesfully"
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: error.message,
+      error: true,
+    });
+  }
+}
+export { createUser, getUser, loginUser, logout };
