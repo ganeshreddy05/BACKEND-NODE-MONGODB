@@ -91,7 +91,7 @@ async function logout(req, res) {
 
     //WE HAVE TO GET THEeUSERiD-Find user document in mongoDb-nullify the refreshToken
     await User.findByIdAndUpdate(userId, { refreshToken: null });
-    //clear the cookes also
+    //clear the cookies also
     res.clearCookie('refreshToken');
     res.status(200).json({
       message : "loggedout succesfully"
@@ -104,4 +104,32 @@ async function logout(req, res) {
     });
   }
 }
+async function getMyProfile(req,res){
+    try {
+      const userId = req.parms.id;
+     const existingUser = await User.exists({_id : userId})
+     console.log("ExistingUser :",existingUser );
+     if(!existingUser._id){
+      throw new Error("user with this user id not exists")
+     }
+     const user = await User.findById(userId);
+       res.status(200).json({
+        message : "user details fetched succesfully",
+        user : user
+       })
+
+    } catch (error) {
+      res.status(400).json({
+        message : error.message,
+        error : true
+      })
+      
+    }
+}
+
+async function refreshAccessToken(){
+    
+}
+
+
 export { createUser, getUser, loginUser, logout };
