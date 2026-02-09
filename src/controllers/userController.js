@@ -1,3 +1,4 @@
+import { jwt, tuple } from "zod";
 import User from "../models/User.js";
 import {
   generateAccessToken,
@@ -73,7 +74,7 @@ async function loginUser(req, res) {
       success: true,
       accessToken: accessToken,
       message: "user loggedin succesfully",
-      userId : existedUser._id
+      userId: existedUser._id,
     });
   } catch (error) {
     console.error(error);
@@ -83,6 +84,33 @@ async function loginUser(req, res) {
     });
   }
 }
+
+async function getUserById(req, res) {
+    try {
+        const userId = req.params.id;
+
+        const existingUser = await User.exists({ _id: userId })
+        console.log("Existing User:", existingUser)
+        if (!existingUser._id) {
+            throw new Error("User doesn't exist!")
+        }
+
+        const user = await User.findById(userId);
+
+        res.status(200).json({
+            message: "User found successfully!",
+            user: user
+        })
+
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({
+            error: true,
+            message: error.message
+        })
+    }
+}
+
 async function logout(req, res) {
   try {
     //get the userId from the req.object
@@ -92,10 +120,10 @@ async function logout(req, res) {
     //WE HAVE TO GET THEeUSERiD-Find user document in mongoDb-nullify the refreshToken
     await User.findByIdAndUpdate(userId, { refreshToken: null });
     //clear the cookies also
-    res.clearCookie('refreshToken');
+    res.clearCookie("refreshToken");
     res.status(200).json({
-      message : "loggedout succesfully"
-    })
+      message: "loggedout succesfully",
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({
@@ -104,32 +132,56 @@ async function logout(req, res) {
     });
   }
 }
-async function getMyProfile(req,res){
-    try {
-      const userId = req.parms.id;
-     const existingUser = await User.exists({_id : userId})
-     console.log("ExistingUser :",existingUser );
-     if(!existingUser._id){
-      throw new Error("user with this user id not exists")
-     }
-     const user = await User.findById(userId);
-       res.status(200).json({
-        message : "user details fetched succesfully",
-        user : user
-       })
-
-    } catch (error) {
-      res.status(400).json({
-        message : error.message,
-        error : true
-      })
-      
+async function getMyProfile(req, res) {
+  try {
+    const userId = req.user.userId;
+    const existingUser = await User.exists({ _id: userId });
+    console.log("ExistingUser :", existingUser);
+    if (!existingUser._id) {
+      throw new Error("user with this user id not exists");
     }
+    const user = await User.findById(userId);
+    res.status(200).json({
+      message: "user details fetched succesfully",
+      user: user,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+      error: true,
+    });
+  }
 }
 
-async function refreshAccessToken(){
-    
+async function refreshAccessToken(req,res) {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    console.log("refresh Token from :", refreshToken);
+    if (!refreshToken) {
+      throw new error("no refresh token found !");
+    }
+    const decodedRefreshToken = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+    );
+    const userId = decodedRefreshToken.userId;
+    const existingUser = await User.findById(userId);
+
+    if (!existingUser) {
+      throw new Error("user not found");
+    }
+    const newAccessToken = generateAccessToken(userId);
+    res.status(200).json({
+      success: true,
+      message: "access token has been refreshed succesfully!",
+      accessToken: newAccessToken,
+    });
+  } catch (error) {
+    res.status(401).json({
+      message: error.message,
+      error: true,
+    });
+  }
 }
 
-
-export { createUser, getUser, loginUser, logout };
+export { createUser, getUser, loginUser, logout, refreshAccessToken ,getMyProfile,getUserById};
