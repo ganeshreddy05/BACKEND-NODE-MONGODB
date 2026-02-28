@@ -11,7 +11,8 @@ import cookieParser from "cookie-parser";
 const app = express();
 app.use(cors(
     {
-        origin: "http://localhost:5173",
+        origin: ["http://localhost:5173","http://localhost:5174","https://backend-project-frontend-jade.vercel.app"],
+
         credentials: true
     }
 ));
