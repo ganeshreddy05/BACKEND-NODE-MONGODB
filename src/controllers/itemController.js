@@ -217,6 +217,7 @@ async function getFreshness(req, res) {
             data: {
                 itemName: item.name,
                 freshness: freshness,
+                
                 daysLeft: Math.ceil(daysLeft),
                 totalShelfLife: Math.ceil(totalShelfLife),
             },
