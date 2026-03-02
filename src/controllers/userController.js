@@ -2,8 +2,7 @@ import { jwt, tuple } from "zod";
 import User from "../models/User.js";
 import {
   generateAccessToken,
-  generateRefreshToken,
-} from "../utils/jwtToken.js";
+  generateRefreshToken,} from "../utils/jwtToken.js";
 import bcrypt from "bcryptjs";
 async function createUser(req, res) {
   try {
@@ -57,7 +56,7 @@ async function loginUser(req, res) {
       throw new Error("Wrong password!");
     }
 
-    //create access token and refresh function
+    //create access token and refresh token
     const accessToken = generateAccessToken(existedUser._id);
     const refreshToken = generateRefreshToken(existedUser._id);
 
@@ -68,7 +67,7 @@ async function loginUser(req, res) {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true, //only for production
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     //send the responsse- accesstoken,refresh token
