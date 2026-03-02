@@ -65,10 +65,11 @@ async function loginUser(req, res) {
 
     //set the browser cookies-access token , refresh token
     res.cookie("refreshToken", refreshToken, {
-      httpOnly: false,
-      secure: true, //only for production
-      sameSite: "none",
+      httpOnly: true,
+      secure: false, //only for production
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path : "/"
     });
     //send the responsse- accesstoken,refresh token
     res.status(200).json({
