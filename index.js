@@ -8,6 +8,7 @@ import bookRouter from "./src/routes/bookRoute.js";
 import itemRouter from "./src/routes/itemRoute.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import morgan from "morgan";
 const app = express();
 app.use(cors(
     {
@@ -16,6 +17,7 @@ app.use(cors(
         credentials: true
     }
 ));
+app.use(morgan("dev"))
 app.use(express.json());
 app.use(cookieParser());
 
