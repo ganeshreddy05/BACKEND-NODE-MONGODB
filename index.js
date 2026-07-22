@@ -12,8 +12,12 @@ import morgan from "morgan";
 const app = express();
 app.use(cors(
     {
-        origin: ["http://localhost:5173","http://localhost:5174","https://backend-project-frontend-jade.vercel.app"],
-
+        origin: [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://backend-project-frontend-jade.vercel.app",
+  "https://backend-project-frontend-pp1wqpbhw.vercel.app"
+],
         credentials: true
     }
 ));
